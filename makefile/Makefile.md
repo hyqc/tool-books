@@ -1,4 +1,6 @@
-# Makefile教程
+# [Makefile教程](https://www.ruanyifeng.com/blog/2015/02/make.html)
+https://www.ruanyifeng.com/blog/2015/02/make.html
+https://www.zhaixue.cc/makefile/makefile-if-function.html
 
 ## Makefile介绍
 Makefile可以让工程完成自动化变异，解放程序员，提高生产力。要使用Makefile自动化编译工程，需要一个Makefile文件，并编写编译规则。
@@ -164,3 +166,87 @@ test:
 - $@ 指代当前构建的目标，如make foo，则$@指代 foo
 - $< 指代第一个前置条件，如规则为 t: a b ，则$<指代 a
 - $? 指代比目标更新的所有前置条件，之间以空格分隔。如规则为：t: p1 p2
+
+#### 判断和循环
+Makefile使用Bash语法，完成判断和循环，其中需要特别注意：***ifeq不能缩减，且后面需要空格，即需要贴墙写***
+- 判断model是否为空字符
+```bash
+.PHONY: test
+test:
+ifeq ($(model),)
+	echo "没有输入"
+else
+	echo $(model)
+endif
+```
+
+
+
+- 循环
+```Makefile
+LIST= 1 2 3
+all:
+	for i in $(LIST); do \
+		echo $$i; \
+	done
+```
+或
+```Makefile
+all:
+	for i in 1 2 3; do \
+		echo $i; \
+	done
+```
+
+#### [函数](http://www.gnu.org/software/make/manual/html_node/Functions.html)
+使用函数格式如下：
+```Makefile
+$(functionname arguments)
+或
+${functionname arguments}
+```
+
+##### shell 函数
+shell函数用来执行shell命令
+```Makefile
+sr := $(shell echo xxx)
+```
+
+##### wildcard 函数
+wildcard用来在Makefile中替换Bash的通配符
+```Makefile
+sr := $(wildcard src/*.txt)
+```
+
+##### subst 函数
+用于文本替换，格式如下：$(subst from, to, text)，示例：
+```Makefile
+$(subst ee,EE,feet on the street)
+```
+输出：fEEt on the strEEt
+
+下面是一个稍微复杂的例子。
+```Makefile
+comma:= ,
+empty:=
+# space变量用两个空变量作为标识符，当中是一个空格
+space:= $(empty) $(empty)
+foo:= a b c
+bar:= $(subst $(space),$(comma),$(foo))
+```
+输出：bar is now `a,b,c'.
+
+##### patsubst 函数
+用于模式匹配替换，格式如下：$(patsubst pattern,replacement,text)
+下面的例子将文件名"x.c.c bar.c"，替换成"x.c.o bar.o"。
+```Makefile
+$(patsubst %.c,%.o,x.c.c bar.c)
+```
+
+##### 替换后缀名
+替换后缀名函数的写法是：变量名 + 冒号 + 后缀名替换规则。它实际上patsubst函数的一种简写形式。
+```Makefile
+min: $(OUTPUT:.js=.min.js)
+```
+上面代码的意思是，将变量OUTPUT中的后缀名 .js 全部替换成 .min.js 。
+
