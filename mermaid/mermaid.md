@@ -1,3 +1,4 @@
+# Mermaid简易教程
 # 语法
 - 图表标题
     ```markdown
